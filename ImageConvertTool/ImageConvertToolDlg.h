@@ -7,19 +7,20 @@
 #include "Converter.h"
 
 #define ARRAY_SIZE(X)	(sizeof(X)/sizeof(X[0]))
-#define MAX_BMP_TYPES	8
+#define MAX_BMP_TYPES	9
 
 const UINT nFormats[] = {
-	CK_ARGB8888, CK_ABGR8888, CK_XRGB8888, CK_XBGR8888,
-	CK_ABGR1555, CK_ARGB4444, CK_RGB565, CK_BGR565,
-	CK_YUV420, CK_TILEMODE
+	CK_RGB888, CK_ARGB8888, CK_ABGR8888, CK_XRGB8888,
+	CK_XBGR8888, CK_ABGR1555, CK_ARGB4444, CK_RGB565,
+	CK_BGR565, CK_YUV420, CK_TILEMODE
 };
 const TCHAR sFormats[][16] = {
-	_T("ARGB8888"), _T("ABGR8888"), _T("XRGB8888"), _T("XBGR8888"),
-	_T("ABGR1555"), _T("ARGB4444"), _T("RGB565"), _T("BGR565"),
-	_T("YUV420"), _T("TILEMODE")
+	_T("RGB888"), _T("ARGB8888"), _T("ABGR8888"), _T("XRGB8888"),
+	_T("XBGR8888"),	_T("ABGR1555"), _T("ARGB4444"), _T("RGB565"),
+	_T("BGR565"), _T("YUV420"), _T("TILEMODE")
 };
 const funcToStandard ftoFormats[] = {
+	RGB888_to_standard,
 	ARGB8888_to_standard, ABGR8888_to_standard,
 	XRGB8888_to_standard, XBGR8888_to_standard,
 	ABGR1555_to_standard, ARGB4444_to_standard,
@@ -27,6 +28,7 @@ const funcToStandard ftoFormats[] = {
 	YUV420_to_standard, TILEMODE_to_standard
 };
 const funcFromStandard ffromFormats[] = {
+	standard_to_RGB888,
 	standard_to_ARGB8888, standard_to_ABGR8888,
 	standard_to_XRGB8888, standard_to_XBGR8888,
 	standard_to_ABGR1555, standard_to_ARGB4444,
@@ -34,6 +36,7 @@ const funcFromStandard ffromFormats[] = {
 	standard_to_YUV420, standard_to_TILEMODE
 };
 const funcOutput foutFormats[] = {
+	output_RGB888,
 	output_ARGB8888, output_ABGR8888,
 	output_XRGB8888, output_XBGR8888,
 	output_ABGR1555, output_ARGB4444,

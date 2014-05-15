@@ -1,7 +1,8 @@
 #pragma once
 
 enum Formats {
-	ARGB8888 = 0,
+	RGB888 = 0,
+	ARGB8888,
 	ABGR8888,
 	XRGB8888,
 	XBGR8888,
@@ -48,32 +49,83 @@ struct palette {
 };
 
 
-typedef int (*funcToStandard)(unsigned char *inBuffer, unsigned int size, unsigned char *outBuffer);
-typedef int (*funcFromStandard)(unsigned char *inBuffer, unsigned int size, unsigned char *outBuffer);
+typedef int (*funcToStandard)(unsigned char *inBuffer, unsigned int size,
+							  unsigned int x, unsigned int y,
+							  unsigned char *outBuffer);
+typedef int (*funcFromStandard)(unsigned char *inBuffer, unsigned int size,
+								unsigned int x, unsigned int y,
+								unsigned char *outBuffer);
 typedef int (*funcOutput)(unsigned char *buffer, unsigned int x, unsigned int y, TCHAR *path);
 
-int ARGB8888_to_standard(unsigned char *inBuffer, unsigned int size, unsigned char *outBuffer);
-int ABGR8888_to_standard(unsigned char *inBuffer, unsigned int size, unsigned char *outBuffer);
-int XRGB8888_to_standard(unsigned char *inBuffer, unsigned int size, unsigned char *outBuffer);
-int XBGR8888_to_standard(unsigned char *inBuffer, unsigned int size, unsigned char *outBuffer);
-int ABGR1555_to_standard(unsigned char *inBuffer, unsigned int size, unsigned char *outBuffer);
-int ARGB4444_to_standard(unsigned char *inBuffer, unsigned int size, unsigned char *outBuffer);
-int RGB565_to_standard(unsigned char *inBuffer, unsigned int size, unsigned char *outBuffer);
-int BGR565_to_standard(unsigned char *inBuffer, unsigned int size, unsigned char *outBuffer);
-int YUV420_to_standard(unsigned char *inBuffer, unsigned int size, unsigned char *outBuffer);
-int TILEMODE_to_standard(unsigned char *inBuffer, unsigned int size, unsigned char *outBuffer);
+int RGB888_to_standard(unsigned char *inBuffer, unsigned int size,
+					   unsigned int x, unsigned int y,
+					   unsigned char *outBuffer);
+int ARGB8888_to_standard(unsigned char *inBuffer, unsigned int size,
+						 unsigned int x, unsigned int y,
+						 unsigned char *outBuffer);
+int ABGR8888_to_standard(unsigned char *inBuffer, unsigned int size,
+						 unsigned int x, unsigned int y,
+						 unsigned char *outBuffer);
+int XRGB8888_to_standard(unsigned char *inBuffer, unsigned int size,
+						 unsigned int x, unsigned int y,
+						 unsigned char *outBuffer);
+int XBGR8888_to_standard(unsigned char *inBuffer, unsigned int size,
+						 unsigned int x, unsigned int y,
+						 unsigned char *outBuffer);
+int ABGR1555_to_standard(unsigned char *inBuffer, unsigned int size,
+						 unsigned int x, unsigned int y,
+						 unsigned char *outBuffer);
+int ARGB4444_to_standard(unsigned char *inBuffer, unsigned int size,
+						 unsigned int x, unsigned int y,
+						 unsigned char *outBuffer);
+int RGB565_to_standard(unsigned char *inBuffer, unsigned int size,
+					   unsigned int x, unsigned int y,
+					   unsigned char *outBuffer);
+int BGR565_to_standard(unsigned char *inBuffer, unsigned int size,
+					   unsigned int x, unsigned int y,
+					   unsigned char *outBuffer);
+int YUV420_to_standard(unsigned char *inBuffer, unsigned int size,
+					   unsigned int x, unsigned int y,
+					   unsigned char *outBuffer);
+int TILEMODE_to_standard(unsigned char *inBuffer, unsigned int size,
+						 unsigned int x, unsigned int y,
+						 unsigned char *outBuffer);
 
-int standard_to_ARGB8888(unsigned char *inBuffer, unsigned int size, unsigned char *outBuffer);
-int standard_to_ABGR8888(unsigned char *inBuffer, unsigned int size, unsigned char *outBuffer);
-int standard_to_XRGB8888(unsigned char *inBuffer, unsigned int size, unsigned char *outBuffer);
-int standard_to_XBGR8888(unsigned char *inBuffer, unsigned int size, unsigned char *outBuffer);
-int standard_to_ABGR1555(unsigned char *inBuffer, unsigned int size, unsigned char *outBuffer);
-int standard_to_ARGB4444(unsigned char *inBuffer, unsigned int size, unsigned char *outBuffer);
-int standard_to_RGB565(unsigned char *inBuffer, unsigned int size, unsigned char *outBuffer);
-int standard_to_BGR565(unsigned char *inBuffer, unsigned int size, unsigned char *outBuffer);
-int standard_to_YUV420(unsigned char *inBuffer, unsigned int size, unsigned char *outBuffer);
-int standard_to_TILEMODE(unsigned char *inBuffer, unsigned int size, unsigned char *outBuffer);
+int standard_to_RGB888(unsigned char *inBuffer, unsigned int size,
+					   unsigned int x, unsigned int y,
+					   unsigned char *outBuffer);
+int standard_to_ARGB8888(unsigned char *inBuffer, unsigned int size,
+						 unsigned int x, unsigned int y,
+						 unsigned char *outBuffer);
+int standard_to_ABGR8888(unsigned char *inBuffer, unsigned int size,
+						 unsigned int x, unsigned int y,
+						 unsigned char *outBuffer);
+int standard_to_XRGB8888(unsigned char *inBuffer, unsigned int size,
+						 unsigned int x, unsigned int y,
+						 unsigned char *outBuffer);
+int standard_to_XBGR8888(unsigned char *inBuffer, unsigned int size,
+						 unsigned int x, unsigned int y,
+						 unsigned char *outBuffer);
+int standard_to_ABGR1555(unsigned char *inBuffer, unsigned int size,
+						 unsigned int x, unsigned int y,
+						 unsigned char *outBuffer);
+int standard_to_ARGB4444(unsigned char *inBuffer, unsigned int size,
+						 unsigned int x, unsigned int y,
+						 unsigned char *outBuffer);
+int standard_to_RGB565(unsigned char *inBuffer, unsigned int size,
+					   unsigned int x, unsigned int y,
+					   unsigned char *outBuffer);
+int standard_to_BGR565(unsigned char *inBuffer, unsigned int size,
+					   unsigned int x, unsigned int y,
+					   unsigned char *outBuffer);
+int standard_to_YUV420(unsigned char *inBuffer, unsigned int size,
+					   unsigned int x, unsigned int y,
+					   unsigned char *outBuffer);
+int standard_to_TILEMODE(unsigned char *inBuffer, unsigned int size,
+						 unsigned int x, unsigned int y,
+						 unsigned char *outBuffer);
 
+int output_RGB888(unsigned char *buffer, unsigned int x, unsigned int y, TCHAR *path);
 int output_ARGB8888(unsigned char *buffer, unsigned int x, unsigned int y, TCHAR *path);
 int output_ABGR8888(unsigned char *buffer, unsigned int x, unsigned int y, TCHAR *path);
 int output_XRGB8888(unsigned char *buffer, unsigned int x, unsigned int y, TCHAR *path);

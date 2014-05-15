@@ -243,7 +243,7 @@ unsigned char* CImageConvertToolDlg::CheckHeader(unsigned char *buf)
 	m_x = dib->bitmap_width;
 	m_y = dib->bitmap_height;
 	m_bpp = dib->bits_per_pixel;
-	m_inputSize -= sizeof(bmp_header)+sizeof(dib_header);
+	m_inputSize -= header->offset;
 
 	return &buf[header->offset];
 }
@@ -256,36 +256,47 @@ int CImageConvertToolDlg::Convert(unsigned char *inBuf)
 	unsigned char *standBuf = NULL, *outBuf = NULL;
 	unsigned int standSize, outSize;
 	TCHAR outPath[MAX_PATH];
+	int steps = 1;
+
+	for (int i=0; i<ARRAY_SIZE(nFormats); i++)
+		if (m_CK_Formats[i].GetCheck()) steps += 2;
+	m_PG_Convert.SetRange(0, steps);
+	m_PG_Convert.SetStep(1);
+	m_PG_Convert.SetPos(0);
 
 	standBuf = (unsigned char*)malloc(sizeof(char)*m_x*m_y*4);
 	outBuf = (unsigned char*)malloc(sizeof(char)*m_x*m_y*4);
+	memset(standBuf, 0, sizeof(char)*m_x*m_y*4);
 
 	tos = ftoFormats[m_CB_Input.GetCurSel()];
-	standSize = tos(inBuf, m_inputSize, standBuf);
+	standSize = tos(inBuf, m_inputSize, m_x, m_y, standBuf);
 	if (!standSize) {
 		MessageBox(_T("Convert to standard format failed"));
 		return -1;
 	}
+	m_PG_Convert.StepIt();
 	for (int i=0; i<ARRAY_SIZE(nFormats); i++) {
 		if (m_CK_Formats[i].GetCheck()) {
-			memset(outBuf, 0, sizeof(char)*standSize);
+			memset(outBuf, 0, sizeof(char)*m_x*m_y*4);
 			froms = ffromFormats[i];
-			outSize = froms(standBuf, standSize, outBuf);
+			outSize = froms(standBuf, standSize, m_x, m_y, outBuf);
 			if (!outSize) {
 				TCHAR msg[256];
 				_stprintf_s(msg, 256, _T("Convert to %s format failed"), sFormats[i]);
 				MessageBox(msg);
 				continue;
 			}
+			m_PG_Convert.StepIt();
 			_stprintf_s(outPath, MAX_PATH, _T("%s_%s.%s"),
 				m_szDstFile, sFormats[i],
-				(m_CB_Input.GetCurSel()<MAX_BMP_TYPES)?_T("bmp"):_T("yuv"));
+				(i<MAX_BMP_TYPES)?_T("bmp"):_T("yuv"));
 			fout = foutFormats[i];
 			if (fout(outBuf, m_x, m_y, outPath)) {
 				TCHAR msg[256];
 				_stprintf_s(msg, 256, _T("Write output for %s failed"), sFormats[i]);
 				MessageBox(msg);
 			}
+			m_PG_Convert.StepIt();
 		}
 	}
 	if (standBuf != inBuf) free(standBuf);
