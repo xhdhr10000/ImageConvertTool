@@ -1,8 +1,8 @@
 #include "StdAfx.h"
 #include "Converter.h"
 
-#define T_X	4
-#define T_Y	3
+#define T_X	8
+#define T_Y	4
 
 int RGB888_to_standard(unsigned char *inBuffer, unsigned int size,
 	unsigned int x, unsigned int y,
@@ -13,6 +13,19 @@ int RGB888_to_standard(unsigned char *inBuffer, unsigned int size,
 	in = inBuffer;
 	out = outBuffer;
 
+#if 1
+	unsigned int i, j;
+	for (i=y-1; (int)i>=0; i--) {
+		for (j=0; j<x; j++) {
+			out[(i*x+j)*4+0] = in[0];
+			out[(i*x+j)*4+1] = in[1];
+			out[(i*x+j)*4+2] = in[2];
+			out[(i*x+j)*4+3] = 0xFF;
+			in += 3;
+		}
+		if (x*3%4 != 0) in += 4-x*3%4;
+	}
+#else
 	while ((unsigned int)(in-inBuffer)<size) {
 		out[0] = in[0];
 		out[1] = in[1];
@@ -21,6 +34,7 @@ int RGB888_to_standard(unsigned char *inBuffer, unsigned int size,
 		in += 3;
 		out += 4;
 	}
+#endif
 
 	return size*4/3;
 }
@@ -29,7 +43,24 @@ int ARGB8888_to_standard(unsigned char *inBuffer, unsigned int size,
 	unsigned int x, unsigned int y,
 	unsigned char *outBuffer)
 {
+#if 1
+	unsigned char *in, *out;
+	unsigned int i, j;
+
+	in = inBuffer;
+	out = outBuffer;
+
+	for (i=y-1; (int)i>=0; i--)
+		for (j=0; j<x; j++) {
+			out[(i*x+j)*4+0] = in[0];
+			out[(i*x+j)*4+1] = in[1];
+			out[(i*x+j)*4+2] = in[2];
+			out[(i*x+j)*4+3] = in[3];
+			in += 4;
+		}
+#else
 	memcpy_s(outBuffer, size, inBuffer, size);
+#endif
 	return size;
 }
 
@@ -42,6 +73,17 @@ int ABGR8888_to_standard(unsigned char *inBuffer, unsigned int size,
 	in = inBuffer;
 	out = outBuffer;
 
+#if 1
+	unsigned int i, j;
+	for (i=y-1; (int)i>=0; i--)
+		for (j=0; j<x; j++) {
+			out[(i*x+j)*4+0] = in[2];
+			out[(i*x+j)*4+1] = in[1];
+			out[(i*x+j)*4+2] = in[0];
+			out[(i*x+j)*4+3] = in[3];
+			in += 4;
+		}
+#else
 	while ((unsigned int)(in-inBuffer)<size) {
 		out[0] = in[2];
 		out[1] = in[1];
@@ -50,6 +92,7 @@ int ABGR8888_to_standard(unsigned char *inBuffer, unsigned int size,
 		in += 4;
 		out += 4;
 	}
+#endif
 
 	return size;
 }
@@ -58,7 +101,7 @@ int XRGB8888_to_standard(unsigned char *inBuffer, unsigned int size,
 	unsigned int x, unsigned int y,
 	unsigned char *outBuffer)
 {
-	memcpy_s(outBuffer, size, inBuffer, size);
+	ARGB8888_to_standard(inBuffer, size, x, y, outBuffer);
 	return size;
 }
 
@@ -79,6 +122,19 @@ int ABGR1555_to_standard(unsigned char *inBuffer, unsigned int size,
 	in = inBuffer;
 	out = outBuffer;
 
+#if 1
+	unsigned int i, j;
+	for (i=y-1; (int)i>=0; i--) {
+		for (j=0; j<x; j++) {
+			out[(i*x+j)*4+0] = (in[1]&0x7C)<<1;
+			out[(i*x+j)*4+1] = ((in[1]&0x3)<<6)|((in[0]&0xE0)>>2);
+			out[(i*x+j)*4+2] = (in[0]&0x1F)<<3;
+			out[(i*x+j)*4+3] = ((in[1]>>7)&0x1)?0xFF:0;
+			in += 2;
+		}
+		if (x*2%4 != 0) in += 4-x*2%4;
+	}
+#else
 	while ((unsigned int)(in-inBuffer)<size) {
 		out[0] = (in[1]&0x7C)<<1;
 		out[1] = ((in[1]&0x3)<<6)|((in[0]&0xE0)>>2);
@@ -86,6 +142,32 @@ int ABGR1555_to_standard(unsigned char *inBuffer, unsigned int size,
 		out[3] = ((in[1]>>7)&0x1)?0xFF:0;
 		in += 2;
 		out += 4;
+	}
+#endif
+
+	return size*2;
+}
+
+int RGBA5551_to_standard(unsigned char *inBuffer, unsigned int size,
+	unsigned int x, unsigned int y,
+	unsigned char *outBuffer)
+{
+	/* RRRRRGGG GGBBBBBA */
+	unsigned char *in, *out;
+
+	in = inBuffer;
+	out = outBuffer;
+
+	unsigned int i, j;
+	for (i=y-1; (int)i>=0; i--) {
+		for (j=0; j<x; j++) {
+			out[(i*x+j)*4+0] = (in[0]&0x3E)<<2;
+			out[(i*x+j)*4+1] = ((in[1]&0x7)<<5)|((in[0]&0xc0)>>3);
+			out[(i*x+j)*4+2] = in[1]&0xF8;
+			out[(i*x+j)*4+3] = (in[0]&0x1)?0xFF:0;
+			in += 2;
+		}
+		if (x*2%4 != 0) in += 4-x*2%4;
 	}
 
 	return size*2;
@@ -101,6 +183,19 @@ int ARGB4444_to_standard(unsigned char *inBuffer, unsigned int size,
 	in = inBuffer;
 	out = outBuffer;
 
+#if 1
+	unsigned int i, j;
+	for (i=y-1; (int)i>=0; i--) {
+		for (j=0; j<x; j++) {
+			out[(i*x+j)*4+0] = (in[0]&0x0F)<<4;
+			out[(i*x+j)*4+1] = in[0]&0xF0;
+			out[(i*x+j)*4+2] = (in[1]&0x0F)<<4;
+			out[(i*x+j)*4+3] = in[1]&0xF0;
+			in += 2;
+		}
+		if (x*2%4 != 0) in += 4-x*2%4;
+	}
+#else
 	while ((unsigned int)(in-inBuffer)<size) {
 		out[0] = (in[0]&0x0F)<<4;
 		out[1] = in[0]&0xF0;
@@ -109,6 +204,7 @@ int ARGB4444_to_standard(unsigned char *inBuffer, unsigned int size,
 		in += 2;
 		out += 4;
 	}
+#endif
 
 	return size*2;
 }
@@ -123,6 +219,19 @@ int RGB565_to_standard(unsigned char *inBuffer, unsigned int size,
 	in = inBuffer;
 	out = outBuffer;
 
+#if 1
+	unsigned int i, j;
+	for (i=y-1; (int)i>=0; i--) {
+		for (j=0; j<x; j++) {
+			out[(i*x+j)*4+0] = (in[0]&0x1F)<<3;
+			out[(i*x+j)*4+1] = ((in[1]&0x7)<<5)|((in[0]&0x70)>>3);
+			out[(i*x+j)*4+2] = in[1]&0xF8;
+			out[(i*x+j)*4+3] = 0xFF;
+			in += 2;
+		}
+		if (x*2%4 != 0) in += 4-x*2%4;
+	}
+#else
 	while ((unsigned int)(in-inBuffer)<size) {
 		out[0] = (in[0]&0x1F)<<3;
 		out[1] = ((in[1]&0x7)<<5)|((in[0]&0x70)>>3);
@@ -131,6 +240,7 @@ int RGB565_to_standard(unsigned char *inBuffer, unsigned int size,
 		in += 2;
 		out += 4;
 	}
+#endif
 
 	return size*2;
 }
@@ -145,6 +255,19 @@ int BGR565_to_standard(unsigned char *inBuffer, unsigned int size,
 	in = inBuffer;
 	out = outBuffer;
 
+#if 1
+	unsigned int i, j;
+	for (i=y-1; (int)i>=0; i--) {
+		for (j=0; j<x; j++) {
+			out[(i*x+j)*4+0] = in[1]&0xF8;
+			out[(i*x+j)*4+1] = ((in[1]&0x7)<<5)|((in[0]&0x70)>>3);
+			out[(i*x+j)*4+2] = (in[0]&0x1F)<<3;
+			out[(i*x+j)*4+3] = 0xFF;
+			in += 2;
+		}
+		if (x*2%4 != 0) in += 4-x*2%4;
+	}
+#else
 	while ((unsigned int)(in-inBuffer)<size) {
 		out[0] = in[1]&0xF8;
 		out[1] = ((in[1]&0x7)<<5)|((in[0]&0x70)>>3);
@@ -153,6 +276,7 @@ int BGR565_to_standard(unsigned char *inBuffer, unsigned int size,
 		in += 2;
 		out += 4;
 	}
+#endif
 
 	return size*2;
 }
@@ -237,31 +361,18 @@ int TILEMODE_to_standard(unsigned char *inBuffer, unsigned int size,
 	if (!yuvBuffer) return 0;
 	in = inBuffer;
 	// Y
-	for (i=0; i<T_Y; i++)
-		for (j=0; j<T_X; j++)
-			for (k=0; k<y/T_Y; k++)
-				for (l=0; l<x/T_X; l++)
-					yuvBuffer[(i*y/T_Y+k)*x+j*x/T_X+l] = *in++;
+	for (i=0; i<y; i+=T_Y)
+		for (j=0; j<x; j+=T_X)
+			for (k=0; k<T_Y; k++)
+				for (l=0; l<T_X; l++)
+					yuvBuffer[(i+k)*x+j+l] = *in++;
 	// UV
-	if (0) { //planar
-		for (i=0; i<T_Y; i++)
-			for (j=0; j<T_X; j++)
-				for (k=0; k<y/T_Y; k+=2)
-					for (l=0; l<x/T_X; l+=2)
-						yuvBuffer[uIndex + (i*y/T_Y+k)*x/2 + (j*x/T_X+l)/2] = *in++;
-		for (i=0; i<T_Y; i++)
-			for (j=0; j<T_X; j++)
-				for (k=0; k<y/T_Y; k+=2)
-					for (l=0; l<x/T_X; l+=2)
-						yuvBuffer[vIndex + (i*y/T_Y+k)*x/2 + (j*x/T_X+l)/2] = *in++;
-	} else {
-		for (i=0; i<T_Y; i++) {
-			for (j=0; j<T_X; j++) {
-				for (k=0; k<y/T_Y; k+=2) {
-					for (l=0; l<x/T_X; l+=2) {
-						yuvBuffer[uIndex + (i*y/T_Y+k)*x/2 + (j*x/T_X+l)] = *in++;
-						yuvBuffer[uIndex + (i*y/T_Y+k)*x/2 + (j*x/T_X+l) +1] = *in++;
-					}
+	for (i=0; i<y/2; i+=T_Y) {
+		for (j=0; j<x; j+=T_X) {
+			for (k=0; k<T_Y; k++) {
+				for (l=0; l<T_X/2; l++) {
+					yuvBuffer[uIndex + (i+k)*x + j + l*2] = *in++;
+					yuvBuffer[uIndex + (i+k)*x + j + l*2 +1] = *in++;
 				}
 			}
 		}
@@ -284,6 +395,18 @@ int standard_to_RGB888(unsigned char *inBuffer, unsigned int size,
 	in = inBuffer;
 	out = outBuffer;
 
+#if 1
+	unsigned int i, j;
+	for (i=0; i<y; i++) {
+		for (j=0; j<x; j++) {
+			out[0] = in[(i*x+j)*4+0];
+			out[1] = in[(i*x+j)*4+1];
+			out[2] = in[(i*x+j)*4+2];
+			out += 3;
+		}
+		if (x*3%4 != 0) out += 4-x*3%4;
+	}
+#else
 	while ((unsigned int)(in-inBuffer)<size) {
 		out[0] = in[0];
 		out[1] = in[1];
@@ -291,6 +414,7 @@ int standard_to_RGB888(unsigned char *inBuffer, unsigned int size,
 		in += 4;
 		out += 3;
 	}
+#endif
 
 	return size*3/4;
 }
@@ -363,6 +487,20 @@ int standard_to_ABGR1555(unsigned char *inBuffer, unsigned int size,
 	in = inBuffer;
 	out = outBuffer;
 
+#if 1
+	unsigned int i, j;
+	for (i=0; i<y; i++) {
+		for (j=0; j<x; j++) {
+			out[1] = in[(i*x+j)*4+3]&0x80;
+			out[1] |= ((in[(i*x+j)*4+0]&0xF8)>>1);
+			out[1] |= ((in[(i*x+j)*4+1]&0xC0)>>6);
+			out[0] = (in[(i*x+j)*4+1]&0x38)<<2;
+			out[0] |= ((in[(i*x+j)*4+2]&0xF8)>>3);
+			out += 2;
+		}
+		if (x*2%4 != 0) out += 4-x*2%4;
+	}
+#else
 	while ((unsigned int)(in-inBuffer)<size) {
 		out[1] = in[3]&0x80;
 		out[1] |= ((in[0]&0xF8)>>1);
@@ -371,6 +509,33 @@ int standard_to_ABGR1555(unsigned char *inBuffer, unsigned int size,
 		out[0] |= ((in[2]&0xF8)>>3);
 		in += 4;
 		out += 2;
+	}
+#endif
+
+	return size/2;
+}
+
+int standard_to_RGBA5551(unsigned char *inBuffer, unsigned int size,
+	unsigned int x, unsigned int y,
+	unsigned char *outBuffer)
+{
+	/* RRRRRGGG GGBBBBBA */
+	unsigned char *in, *out;
+
+	in = inBuffer;
+	out = outBuffer;
+
+	unsigned int i, j;
+	for (i=0; i<y; i++) {
+		for (j=0; j<x; j++) {
+			out[0] = in[(i*x+j)*4+3]&0x1;
+			out[0] |= ((in[(i*x+j)*4+0]&0xF8)>>2);
+			out[0] |= ((in[(i*x+j)*4+1]&0x18)<<3);
+			out[1] = (in[(i*x+j)*4+1]&0xE0)>>5;
+			out[1] |= (in[(i*x+j)*4+2]&0xF8);
+			out += 2;
+		}
+		if (x*2%4 != 0) out += 4-x*2%4;
 	}
 
 	return size/2;
@@ -386,6 +551,19 @@ int standard_to_ARGB4444(unsigned char *inBuffer, unsigned int size,
 	in = inBuffer;
 	out = outBuffer;
 
+#if 1
+	unsigned int i, j;
+	for (i=0; i<y; i++) {
+		for (j=0; j<x; j++) {
+			out[1] = in[(i*x+j)*4+3]&0xF0;
+			out[1] |= ((in[(i*x+j)*4+2]&0xF0)>>4);
+			out[0] = in[(i*x+j)*4+1]&0xF0;
+			out[0] |= ((in[(i*x+j)*4+0]&0xF0)>>4);
+			out += 2;
+		}
+		if (x*2%4 != 0) out += 4-x*2%4;
+	}
+#else
 	while ((unsigned int)(in-inBuffer)<size) {
 		out[1] = in[3]&0xF0;
 		out[1] |= ((in[2]&0xF0)>>4);
@@ -394,6 +572,7 @@ int standard_to_ARGB4444(unsigned char *inBuffer, unsigned int size,
 		in += 4;
 		out += 2;
 	}
+#endif
 
 	return size/2;
 }
@@ -408,6 +587,19 @@ int standard_to_RGB565(unsigned char *inBuffer, unsigned int size,
 	in = inBuffer;
 	out = outBuffer;
 
+#if 1
+	unsigned int i, j;
+	for (i=0; i<y; i++) {
+		for (j=0; j<x; j++) {
+			out[1] = in[(i*x+j)*4+2]&0xF8;
+			out[1] |= ((in[(i*x+j)*4+1]&0xE0)>>5);
+			out[0] = ((in[(i*x+j)*4+1]&0x1C)<<3);
+			out[0] |= ((in[(i*x+j)*4+0]&0xF8)>>3);
+			out += 2;
+		}
+		if (x*2%4 != 0) out += 4-x*2%4;
+	}
+#else
 	while ((unsigned int)(in-inBuffer)<size) {
 		out[1] = in[2]&0xF8;
 		out[1] |= ((in[1]&0xE0)>>5);
@@ -416,6 +608,7 @@ int standard_to_RGB565(unsigned char *inBuffer, unsigned int size,
 		in += 4;
 		out += 2;
 	}
+#endif
 
 	return size/2;
 }
@@ -432,6 +625,19 @@ int standard_to_BGR565(unsigned char *inBuffer, unsigned int size,
 	in = inBuffer;
 	out = outBuffer;
 
+#if 1
+	unsigned int i, j;
+	for (i=0; i<y; i++) {
+		for (j=0; j<x; j++) {
+			out[1] = in[(i*x+j)*4+0]&0xF8;
+			out[1] |= ((in[(i*x+j)*4+1]&0xE0)>>5);
+			out[0] = ((in[(i*x+j)*4+1]&0x1C)<<3);
+			out[0] |= ((in[(i*x+j)*4+2]&0xF8)>>3);
+			out += 2;
+		}
+		if (x*2%4 != 0) out += 4-x*2%4;
+	}
+#else
 	while ((unsigned int)(in-inBuffer)<size) {
 		out[1] = in[0]&0xF8;
 		out[1] |= ((in[1]&0xE0)>>5);
@@ -440,6 +646,7 @@ int standard_to_BGR565(unsigned char *inBuffer, unsigned int size,
 		in += 4;
 		out += 2;
 	}
+#endif
 
 	return size/2;
 }
@@ -537,31 +744,18 @@ int standard_to_TILEMODE(unsigned char *inBuffer, unsigned int size,
 
 	out = outBuffer;
 	// Y
-	for (i=0; i<T_Y; i++)
-		for (j=0; j<T_X; j++)
-			for (k=0; k<y/T_Y; k++)
-				for (l=0; l<x/T_X; l++)
-					*out++ = yuvBuffer[(i*y/T_Y+k)*x + j*x/T_X + l];
+	for (i=0; i<y; i+=T_Y)
+		for (j=0; j<x; j+=T_X)
+			for (k=0; k<T_Y; k++)
+				for (l=0; l<T_X; l++)
+					*out++ = yuvBuffer[(i+k)*x + j + l];
 	// UV
-	if (0) { //planar
-		for (i=0; i<T_Y; i++)
-			for (j=0; j<T_X; j++)
-				for (k=0; k<y/T_Y; k+=2)
-					for (l=0; l<x/T_X; l+=2)
-						*out++ = yuvBuffer[uIndex + (i*y/T_Y+k)/2*x/2 + (j*x/T_X+l)/2];
-		for (i=0; i<T_Y; i++)
-			for (j=0; j<T_X; j++)
-				for (k=0; k<y/T_Y; k+=2)
-					for (l=0; l<x/T_X; l+=2)
-						*out++ = yuvBuffer[vIndex + (i*y/T_Y+k)/2*x/2 + (j*x/T_X+l)/2];
-	} else { //semi-planar
-		for (i=0; i<T_Y; i++) {
-			for (j=0; j<T_X; j++) {
-				for (k=0; k<y/T_Y; k+=2) {
-					for (l=0; l<x/T_X; l+=2) {
-						*out++ = yuvBuffer[uIndex + (i*y/T_Y+k)*x/2 + (j*x/T_X+l)];
-						*out++ = yuvBuffer[uIndex + (i*y/T_Y+k)*x/2 + (j*x/T_X+l) +1];
-					}
+	for (i=0; i<y/2; i+=T_Y) {
+		for (j=0; j<x; j+=T_X) {
+			for (k=0; k<T_Y; k++) {
+				for (l=0; l<T_X/2; l++) {
+					*out++ = yuvBuffer[uIndex + (i+k)*x + j + l*2];
+					*out++ = yuvBuffer[uIndex + (i+k)*x + j + l*2 +1];
 				}
 			}
 		}
@@ -572,52 +766,57 @@ int standard_to_TILEMODE(unsigned char *inBuffer, unsigned int size,
 }
 
 
-int output_RGB888(unsigned char *buffer, unsigned int x, unsigned int y, TCHAR *path)
+int output_RGB888(unsigned char *buffer, unsigned int x, unsigned int y, TCHAR *path, int rawdata)
 {
-	return output_BMP(buffer, x, y, 24, RGB888, path);
+	return output_BMP(buffer, x, y, 24, RGB888, path, rawdata);
 }
 
-int output_ARGB8888(unsigned char *buffer, unsigned int x, unsigned int y, TCHAR *path)
+int output_ARGB8888(unsigned char *buffer, unsigned int x, unsigned int y, TCHAR *path, int rawdata)
 {
-	return output_BMP(buffer, x, y, 32, ARGB8888, path);
+	return output_BMP(buffer, x, y, 32, ARGB8888, path, rawdata);
 }
 
-int output_ABGR8888(unsigned char *buffer, unsigned int x, unsigned int y, TCHAR *path)
+int output_ABGR8888(unsigned char *buffer, unsigned int x, unsigned int y, TCHAR *path, int rawdata)
 {
-	return output_BMP(buffer, x, y, 32, ABGR8888, path);
+	return output_BMP(buffer, x, y, 32, ABGR8888, path, rawdata);
 }
 
-int output_XRGB8888(unsigned char *buffer, unsigned int x, unsigned int y, TCHAR *path)
+int output_XRGB8888(unsigned char *buffer, unsigned int x, unsigned int y, TCHAR *path, int rawdata)
 {
-	return output_BMP(buffer, x, y, 32, XRGB8888, path);
+	return output_BMP(buffer, x, y, 32, XRGB8888, path, rawdata);
 }
 
-int output_XBGR8888(unsigned char *buffer, unsigned int x, unsigned int y, TCHAR *path)
+int output_XBGR8888(unsigned char *buffer, unsigned int x, unsigned int y, TCHAR *path, int rawdata)
 {
-	return output_BMP(buffer, x, y, 32, XBGR8888, path);
+	return output_BMP(buffer, x, y, 32, XBGR8888, path, rawdata);
 }
 
-int output_ABGR1555(unsigned char *buffer, unsigned int x, unsigned int y, TCHAR *path)
+int output_ABGR1555(unsigned char *buffer, unsigned int x, unsigned int y, TCHAR *path, int rawdata)
 {
-	return output_BMP(buffer, x, y, 16, ABGR1555, path);
+	return output_BMP(buffer, x, y, 16, ABGR1555, path, rawdata);
 }
 
-int output_ARGB4444(unsigned char *buffer, unsigned int x, unsigned int y, TCHAR *path)
+int output_RGBA5551(unsigned char *buffer, unsigned int x, unsigned int y, TCHAR *path, int rawdata)
 {
-	return output_BMP(buffer, x, y, 16, ARGB4444, path);
+	return output_BMP(buffer, x, y, 16, RGBA5551, path, rawdata);
 }
 
-int output_RGB565(unsigned char *buffer, unsigned int x, unsigned int y, TCHAR *path)
+int output_ARGB4444(unsigned char *buffer, unsigned int x, unsigned int y, TCHAR *path, int rawdata)
 {
-	return output_BMP(buffer, x, y, 16, RGB565, path);
+	return output_BMP(buffer, x, y, 16, ARGB4444, path, rawdata);
 }
 
-int output_BGR565(unsigned char *buffer, unsigned int x, unsigned int y, TCHAR *path)
+int output_RGB565(unsigned char *buffer, unsigned int x, unsigned int y, TCHAR *path, int rawdata)
 {
-	return output_BMP(buffer, x, y, 16, BGR565, path);
+	return output_BMP(buffer, x, y, 16, RGB565, path, rawdata);
 }
 
-int output_YUV420(unsigned char *buffer, unsigned int x, unsigned int y, TCHAR *path)
+int output_BGR565(unsigned char *buffer, unsigned int x, unsigned int y, TCHAR *path, int rawdata)
+{
+	return output_BMP(buffer, x, y, 16, BGR565, path, rawdata);
+}
+
+int output_YUV420(unsigned char *buffer, unsigned int x, unsigned int y, TCHAR *path, int rawdata)
 {
 	FILE *f;
 
@@ -629,9 +828,9 @@ int output_YUV420(unsigned char *buffer, unsigned int x, unsigned int y, TCHAR *
 	return 0;
 }
 
-int output_TILEMODE(unsigned char *buffer, unsigned int x, unsigned int y, TCHAR *path)
+int output_TILEMODE(unsigned char *buffer, unsigned int x, unsigned int y, TCHAR *path, int rawdata)
 {
-	return output_YUV420(buffer, x, y, path);
+	return output_YUV420(buffer, x, y, path, rawdata);
 }
 
 int output_BMP_Header(unsigned int x, unsigned int y, unsigned int bpp, Formats format, FILE *f)
@@ -667,6 +866,13 @@ int output_BMP_Header(unsigned int x, unsigned int y, unsigned int bpp, Formats 
 			pal.green	= 0x3E0;
 			pal.blue	= 0x7C00;
 			break;
+		case RGBA5551:
+			/* RRRRRGGG GGBBBBBA */
+			pal.alpha	= 0x1;
+			pal.red		= 0xF800;
+			pal.green	= 0x7C0;
+			pal.blue	= 0x3E;
+			break;
 		case ARGB4444:
 			/* AAAARRRR GGGGBBBB */
 			pal.alpha	= 0xF000;
@@ -699,15 +905,28 @@ int output_BMP_Header(unsigned int x, unsigned int y, unsigned int bpp, Formats 
 }
 
 int output_BMP(unsigned char *buffer, unsigned int x, unsigned int y,
-			   unsigned int bpp, Formats format, TCHAR *path)
+			   unsigned int bpp, Formats format, TCHAR *path, int rawdata)
 {
 	FILE *f;
+	unsigned int i, remainder=0;
 
 	_tfopen_s(&f, path, _T("wb"));
 	if (f == NULL) return -1;
-	if (output_BMP_Header(x, y, bpp, format, f)) return -1;
+	if (!rawdata && output_BMP_Header(x, y, bpp, format, f)) return -1;
 
-	fwrite(buffer, x*y*bpp/8, 1, f);
+	if (x*bpp/8%4) remainder = 4-x*bpp/8%4;
+
+	if (!rawdata) {
+		for (i=y-1; (int)i>=0; i--) {
+			fwrite(&buffer[i*(x*bpp/8+remainder)], x*bpp/8, 1, f);
+			fwrite("\0", 1, remainder, f);
+		}
+	} else {
+		for (i=0; i<y; i++) {
+			fwrite(&buffer[i*(x*bpp/8+remainder)], x*bpp/8, 1, f);
+			fwrite("\0", 1, remainder, f);
+		}
+	}
 	fclose(f);
 
 	return 0;

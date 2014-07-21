@@ -7,6 +7,7 @@ enum Formats {
 	XRGB8888,
 	XBGR8888,
 	ABGR1555,
+	RGBA5551,
 	ARGB4444,
 	RGB565,
 	BGR565,
@@ -55,7 +56,7 @@ typedef int (*funcToStandard)(unsigned char *inBuffer, unsigned int size,
 typedef int (*funcFromStandard)(unsigned char *inBuffer, unsigned int size,
 								unsigned int x, unsigned int y,
 								unsigned char *outBuffer);
-typedef int (*funcOutput)(unsigned char *buffer, unsigned int x, unsigned int y, TCHAR *path);
+typedef int (*funcOutput)(unsigned char *buffer, unsigned int x, unsigned int y, TCHAR *path, int rawdata);
 
 int RGB888_to_standard(unsigned char *inBuffer, unsigned int size,
 					   unsigned int x, unsigned int y,
@@ -73,6 +74,9 @@ int XBGR8888_to_standard(unsigned char *inBuffer, unsigned int size,
 						 unsigned int x, unsigned int y,
 						 unsigned char *outBuffer);
 int ABGR1555_to_standard(unsigned char *inBuffer, unsigned int size,
+						 unsigned int x, unsigned int y,
+						 unsigned char *outBuffer);
+int RGBA5551_to_standard(unsigned char *inBuffer, unsigned int size,
 						 unsigned int x, unsigned int y,
 						 unsigned char *outBuffer);
 int ARGB4444_to_standard(unsigned char *inBuffer, unsigned int size,
@@ -109,6 +113,9 @@ int standard_to_XBGR8888(unsigned char *inBuffer, unsigned int size,
 int standard_to_ABGR1555(unsigned char *inBuffer, unsigned int size,
 						 unsigned int x, unsigned int y,
 						 unsigned char *outBuffer);
+int standard_to_RGBA5551(unsigned char *inBuffer, unsigned int size,
+						 unsigned int x, unsigned int y,
+						 unsigned char *outBuffer);
 int standard_to_ARGB4444(unsigned char *inBuffer, unsigned int size,
 						 unsigned int x, unsigned int y,
 						 unsigned char *outBuffer);
@@ -125,18 +132,19 @@ int standard_to_TILEMODE(unsigned char *inBuffer, unsigned int size,
 						 unsigned int x, unsigned int y,
 						 unsigned char *outBuffer);
 
-int output_RGB888(unsigned char *buffer, unsigned int x, unsigned int y, TCHAR *path);
-int output_ARGB8888(unsigned char *buffer, unsigned int x, unsigned int y, TCHAR *path);
-int output_ABGR8888(unsigned char *buffer, unsigned int x, unsigned int y, TCHAR *path);
-int output_XRGB8888(unsigned char *buffer, unsigned int x, unsigned int y, TCHAR *path);
-int output_XBGR8888(unsigned char *buffer, unsigned int x, unsigned int y, TCHAR *path);
-int output_ABGR1555(unsigned char *buffer, unsigned int x, unsigned int y, TCHAR *path);
-int output_ARGB4444(unsigned char *buffer, unsigned int x, unsigned int y, TCHAR *path);
-int output_RGB565(unsigned char *buffer, unsigned int x, unsigned int y, TCHAR *path);
-int output_BGR565(unsigned char *buffer, unsigned int x, unsigned int y, TCHAR *path);
-int output_YUV420(unsigned char *buffer, unsigned int x, unsigned int y, TCHAR *path);
-int output_TILEMODE(unsigned char *buffer, unsigned int x, unsigned int y, TCHAR *path);
+int output_RGB888(unsigned char *buffer, unsigned int x, unsigned int y, TCHAR *path, int rawdata);
+int output_ARGB8888(unsigned char *buffer, unsigned int x, unsigned int y, TCHAR *path, int rawdata);
+int output_ABGR8888(unsigned char *buffer, unsigned int x, unsigned int y, TCHAR *path, int rawdata);
+int output_XRGB8888(unsigned char *buffer, unsigned int x, unsigned int y, TCHAR *path, int rawdata);
+int output_XBGR8888(unsigned char *buffer, unsigned int x, unsigned int y, TCHAR *path, int rawdata);
+int output_ABGR1555(unsigned char *buffer, unsigned int x, unsigned int y, TCHAR *path, int rawdata);
+int output_RGBA5551(unsigned char *buffer, unsigned int x, unsigned int y, TCHAR *path, int rawdata);
+int output_ARGB4444(unsigned char *buffer, unsigned int x, unsigned int y, TCHAR *path, int rawdata);
+int output_RGB565(unsigned char *buffer, unsigned int x, unsigned int y, TCHAR *path, int rawdata);
+int output_BGR565(unsigned char *buffer, unsigned int x, unsigned int y, TCHAR *path, int rawdata);
+int output_YUV420(unsigned char *buffer, unsigned int x, unsigned int y, TCHAR *path, int rawdata);
+int output_TILEMODE(unsigned char *buffer, unsigned int x, unsigned int y, TCHAR *path, int rawdata);
 
 int output_BMP_Header(unsigned int x, unsigned int y, unsigned int bpp, Formats format, FILE *f);
 int output_BMP(unsigned char *buffer, unsigned int x, unsigned int y,
-			   unsigned int bpp, Formats format, TCHAR *path);
+			   unsigned int bpp, Formats format, TCHAR *path, int rawdata);

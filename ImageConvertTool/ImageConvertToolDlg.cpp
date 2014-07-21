@@ -53,6 +53,7 @@ BOOL CImageConvertToolDlg::OnInitDialog()
 	if (!m_TB_Input.SubclassDlgItem(TB_INPUT, this)) return FALSE;
 	if (!m_TB_Output.SubclassDlgItem(TB_OUTPUT, this)) return FALSE;
 	if (!m_CK_RawData.SubclassDlgItem(CK_RAWDATA, this)) return FALSE;
+	if (!m_CK_OutRawData.SubclassDlgItem(CK_OUTRAWDATA, this)) return FALSE;
 	if (!m_CB_Input.SubclassDlgItem(CB_INPUT, this)) return FALSE;
 	if (!m_LB_Resolution.SubclassDlgItem(LB_RESOLUTION, this)) return FALSE;
 	if (!m_LB_X.SubclassDlgItem(LB_X, this)) return FALSE;
@@ -291,7 +292,7 @@ int CImageConvertToolDlg::Convert(unsigned char *inBuf)
 				m_szDstFile, sFormats[i],
 				(i<MAX_BMP_TYPES)?_T("bmp"):_T("yuv"));
 			fout = foutFormats[i];
-			if (fout(outBuf, m_x, m_y, outPath)) {
+			if (fout(outBuf, m_x, m_y, outPath, m_CK_OutRawData.GetCheck())) {
 				TCHAR msg[256];
 				_stprintf_s(msg, 256, _T("Write output for %s failed"), sFormats[i]);
 				MessageBox(msg);
@@ -307,4 +308,9 @@ int CImageConvertToolDlg::Convert(unsigned char *inBuf)
 int CImageConvertToolDlg::WriteOutput(unsigned char *buf, unsigned int size, TCHAR *path)
 {
 	return 0;
+}
+
+void CImageConvertToolDlg::OnOK()
+{
+	OnBnClickedConvert();
 }
